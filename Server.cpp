@@ -57,6 +57,7 @@ string readTheFile(string fileName) {
 	if (type == "") {
 		if (myfile.is_open()) {
 			fileRead += ("HTTP/1.0 200 OK \r\n");
+			fileRead += "{";
 			while (myfile.good()) {
 				//line
 				getline(myfile, line);
@@ -64,7 +65,7 @@ string readTheFile(string fileName) {
 				fileRead += (line);
 
 			}
-
+			fileRead += "}";
 			myfile.close();
 		}
 
@@ -99,7 +100,9 @@ string readTheFile(string fileName) {
 			strstream >> number;
 			fileRead += number;
 			fileRead += "\r\n \r\n";
+			fileRead += "{";
 			fileRead += memblock;
+			fileRead += "}";
 			delete[] memblock;
 		} else {
 			//cout << "Unable to open file";
