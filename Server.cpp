@@ -1,12 +1,4 @@
 /*
- * Server.cpp
- *
- *  Created on: Oct 18, 2013
- *      Author: omnia
- */
-
-
-/*
  * Main.cpp
  *
  *  Created on: Oct 18, 2013
@@ -43,6 +35,16 @@ vector<string> split(string str) {
 	return tokens;
 }
 string readTheFile(string fileName) {
+	string type = "";
+	if (fileName.find(".jpg") != std::string::npos) {
+		type = "image/jpg\r\n";
+	}
+	if (fileName.find(".png") != std::string::npos) {
+		type = "image/png\r\n";
+	}
+	if (fileName.find(".gif") != std::string::npos) {
+		type = "image/gif\r\n";
+	}
 	int TempNumOne = fileName.size();
 	char Filename[100];
 	for (int a = 0; a <= TempNumOne; a++) {
@@ -52,23 +54,58 @@ string readTheFile(string fileName) {
 
 	ifstream myfile(Filename);
 	string fileRead;
-	if (myfile.is_open()) {
-		fileRead += ("HTTP/1.0 200 OK \r\n {");
-		while (myfile.good()) {
-			//line
-			getline(myfile, line);
+	if (type == "") {
+		if (myfile.is_open()) {
+			fileRead += ("HTTP/1.0 200 OK \r\n");
+			while (myfile.good()) {
+				//line
+				getline(myfile, line);
 
-			fileRead += (line + ",");
+				fileRead += (line);
 
+			}
+
+			myfile.close();
 		}
-		fileRead = fileRead.substr(0, fileRead.size() - 1);
-		fileRead += "}";
-		myfile.close();
-	}
 
-	else {
-		//cout << "Unable to open file";
-		fileRead += ("HTTP/1.0 404 Not Found\r\n");
+		else {
+			//cout << "Unable to open file";
+			fileRead += ("HTTP/1.0 404 Not Found\r\n");
+		}
+	} else {
+		//image file .. read it binary
+		ifstream::pos_type size;
+		char * memblock;
+		ifstream file(Filename, ios::in | ios::binary | ios::ate);
+		if (file.is_open()) {
+			// long begin,end;
+			fileRead += ("HTTP/1.0 200 OK \r\n");
+			fileRead += ("Content-Type : " + type + "\r\n");
+			size = file.tellg();
+			//begin  = size;
+			memblock = new char[size];
+			file.seekg(0, ios::beg);
+			// end = myfile.tellg();
+			file.read(memblock, size);
+			file.close();
+
+			// cout << "the complete file content is in memory";
+			//  cout<< memblock <<endl;
+			//  cout <<size;
+			fileRead += ("Content-Length: ");
+			std::string number;
+			std::stringstream strstream;
+			strstream << size;
+			strstream >> number;
+			fileRead += number;
+			fileRead += "\r\n \r\n";
+			fileRead += memblock;
+			delete[] memblock;
+		} else {
+			//cout << "Unable to open file";
+			fileRead += ("HTTP/1.0 404 Not Found\r\n");
+		}
+
 	}
 	return fileRead;
 }
@@ -101,18 +138,17 @@ int main(int argc, char *argv[]) {
 			error("ERROR on accept");
 		pid_t PID = fork();
 		if (PID == 0) {
-			bzero(buffer, 256);
-			n = read(newsockfd, buffer, 255);
+			bzero(buffer, 1024);
+			n = read(newsockfd, buffer, 1023);
 			if (n < 0)
 				error("ERROR reading from socket");
 			printf("Here is the message: %s\n", buffer);
 			string buf = buffer;
 			vector<string> dataOfTheMessage = split(buf); //[GET , fname , HTTP1.0 ..]
-			if (dataOfTheMessage[0] == "GET"
-					&& dataOfTheMessage[2] == "HTTP/1.0"
-					&& dataOfTheMessage.size() == 3) {
+			if (dataOfTheMessage.size() == 3 && dataOfTheMessage[0] == "GET"
+					&& dataOfTheMessage[2] == "HTTP/1.0") {
 				string fname = dataOfTheMessage[1];
-				fname = fname.substr(1,fname.size()-1);
+				fname = fname.substr(1, fname.size() - 1);
 				string dataReturned = readTheFile(fname);
 				n = write(newsockfd, dataReturned.c_str(), 1024);
 			} else {
@@ -129,6 +165,4 @@ int main(int argc, char *argv[]) {
 	}
 	return 0;
 }
-
-
 
