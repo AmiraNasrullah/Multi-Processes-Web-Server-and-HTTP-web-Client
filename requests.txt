@@ -1,0 +1,5 @@
+GET /html.html HTTP/1.0\r\n
+GET /test.txt HTTP/1.0\r\n
+GET /tt.txt HTTP/1.0\r\n
+GET /testtest.txt HTTP/1.0\r\n
+\r\n
