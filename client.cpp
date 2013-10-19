@@ -24,7 +24,7 @@
 using namespace std;
 string fileName = "requests.txt";
 string hostname = "localhost";
-string portnum = "59747";
+string portnum = "4747";
 void PANIC(const char *msg) {
 	perror(msg);
 }
@@ -112,29 +112,32 @@ int main(int Count, char *Strings[]) {
 			send(sockfd, buffer, strlen(buffer), 0);
 
 			/*---While there's data, read and print it---*/
-			bzero(buffer, sizeof(buffer));
-			bytes_read = recv(sockfd, buffer, sizeof(buffer), 0);
-			if (bytes_read > 0)
-				printf("%s", buffer);
-			if (buffer == "HTTP/1.0 404 Not Found\r\n") {
-				PANIC("HTTP/1.0 404 Not Found");
-			} else {
-				string buf = buffer;
-				//create file with data received
-				size_t file_start = buf.find("{", 0);
-				size_t file_end = buf.length() - 1;
-				int file_length = file_end - file_start - 1;
-				buf = buf.substr(file_start + 1, file_length);
-				string fileName = vec[1].substr(1, vec[1].length());
-				/*-------------@TODO-------------*/
-				/*------check if file is image handle it--------*/
-				/*-----write it to file-----*/
-				std::ofstream outfile((fileName).c_str());
-				outfile.write(buf.c_str(), buf.length());
-				outfile.close();
-			}
-
-
+			string fileName = vec[1].substr(1, vec[1].length());
+			std::ofstream outfile((fileName).c_str(), ios::binary);
+			string file;
+			do {
+				bzero(buffer, sizeof(buffer));
+				bytes_read = recv(sockfd, buffer, sizeof(buffer), 0);
+				if (bytes_read > 0) {
+					printf("%s", buffer);
+					if (buffer == "HTTP/1.0 404 Not Found\r\n") {
+						PANIC("HTTP/1.0 404 Not Found");
+					} else {
+						string buf = buffer;
+						//create file with data received
+						size_t file_start = buf.find("{", 0);
+						size_t file_end = buf.length() - 1;
+						int file_length = file_end - file_start - 1;
+						buf = buf.substr(file_start + 1, file_length);
+						file += buf;
+					}
+				}
+			} while (bytes_read > 0);
+			/*-------------@TODO-------------*/
+			/*------check if file is image handle it--------*/
+			/*-----write it to file-----*/
+			outfile << file;
+			outfile.close();
 			/*---Clean up---*/
 			close(sockfd);
 		}
