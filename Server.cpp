@@ -116,7 +116,7 @@ string readTheFile(string fileName) {
 int main(int argc, char *argv[]) {
 	int sockfd, newsockfd, portno;
 	socklen_t clilen;
-	char buffer[1024];
+	char buffer[1024000];
 	struct sockaddr_in serv_addr, cli_addr;
 	int n;
 	if (argc < 2) {
@@ -141,8 +141,8 @@ int main(int argc, char *argv[]) {
 			error("ERROR on accept");
 		pid_t PID = fork();
 		if (PID == 0) {
-			bzero(buffer, 1024);
-			n = read(newsockfd, buffer, 1023);
+			bzero(buffer, 1024000);
+			n = read(newsockfd, buffer, 1023999);
 			if (n < 0)
 				error("ERROR reading from socket");
 			printf("Here is the message: %s\n", buffer);
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 				string fname = dataOfTheMessage[1];
 				fname = fname.substr(1, fname.size() - 1);
 				string dataReturned = readTheFile(fname);
-				n = write(newsockfd, dataReturned.c_str(), 1024);
+				n = write(newsockfd, dataReturned.c_str(), 1024000);
 			} else {
 				n = write(newsockfd, "Error not well formed", 50);
 			}
