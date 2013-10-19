@@ -54,7 +54,7 @@ string readTheFile(string fileName) {
 
 	ifstream myfile(Filename);
 	string fileRead;
-//	if (type == "") {
+	if (type == "") {
 		if (myfile.is_open()) {
 			fileRead += ("HTTP/1.0 200 OK \r\n");
 			fileRead += "{";
@@ -73,44 +73,34 @@ string readTheFile(string fileName) {
 			//cout << "Unable to open file";
 			fileRead += ("HTTP/1.0 404 Not Found\r\n");
 		}
-//	} else {
-//		//image file .. read it binary
-//		ifstream::pos_type size;
-//		char * memblock;
-//		ifstream file(Filename, ios::in | ios::binary | ios::ate);
-//		if (file.is_open()) {
-//			// long begin,end;
-//			fileRead += ("HTTP/1.0 200 OK \r\n");
-//			fileRead += ("Content-Type : " + type + "\r\n");
-//			size = file.tellg();
-//			//begin  = size;
-//			memblock = new char[size];
-//			file.seekg(0, ios::beg);
-//			// end = myfile.tellg();
-//			file.read(memblock, size);
-//			file.close();
-//
-//			// cout << "the complete file content is in memory";
-//			//  cout<< memblock <<endl;
-//			//  cout <<size;
-//			fileRead += ("Content-Length: ");
-//			std::string number;
-//			std::stringstream strstream;
-//			strstream << size;
-//			strstream >> number;
-//			fileRead += number;
-//			fileRead += "\r\n \r\n";
-//			fileRead += "{";
-//			fileRead += memblock;
-//			cout << memblock
-//			fileRead += "}";
-//			delete[] memblock;
-//		} else {
-//			//cout << "Unable to open file";
-//			fileRead += ("HTTP/1.0 404 Not Found\r\n");
-//		}
-//
-//	}
+	} else {
+		if (myfile.is_open()) {
+			long size = 0;
+			fileRead += ("HTTP/1.0 200 OK \r\n");
+			fileRead += ("Content-Type : " + type + "\r\n");
+
+			//image file .. read it binary
+			std::ifstream fin(Filename, std::ios::in | std::ios::binary);
+			std::ostringstream oss;
+			oss << fin.rdbuf();
+			std::string data(oss.str());
+			size = fin.tellg();
+			fileRead += ("Content-Length: ");
+			//casting size to string
+			std::string number;
+			std::stringstream strstream;
+			strstream << size;
+			strstream >> number;
+			fileRead += number;
+			fileRead += "{";
+			fileRead += oss.str();
+
+			fileRead += "}";
+		} else {
+			fileRead += ("HTTP/1.0 404 Not Found\r\n");
+		}
+
+	}
 	return fileRead;
 }
 
@@ -154,8 +144,11 @@ int main(int argc, char *argv[]) {
 				string fname = dataOfTheMessage[1];
 				fname = fname.substr(1, fname.size() - 1);
 				string dataReturned = readTheFile(fname);
-				cout << dataReturned <<endl;
-				n = write(newsockfd, dataReturned.c_str(), 102400000);
+//				cout << dataReturned <<endl;
+				ofstream myFile("data.bin", ios::out | ios::binary);
+				myFile.write(dataReturned.c_str(), dataReturned.length());
+				n = write(newsockfd, dataReturned.c_str(),
+						dataReturned.length());
 			} else {
 				n = write(newsockfd, "Error not well formed", 50);
 			}
