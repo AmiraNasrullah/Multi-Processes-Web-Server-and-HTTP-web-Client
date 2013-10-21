@@ -24,7 +24,7 @@
 using namespace std;
 string fileName = "requests.txt";
 string hostname = "localhost";
-string portnum = "4747";
+string portnum = "5647";
 void PANIC(const char *msg) {
 	perror(msg);
 }
@@ -118,25 +118,27 @@ int main(int Count, char *Strings[]) {
 			do {
 				bzero(buffer, sizeof(buffer));
 				bytes_read = recv(sockfd, buffer, sizeof(buffer), 0);
+				cout <<"data "<< buffer << endl;
 				if (bytes_read > 0) {
-					printf("%s", buffer);
-					if (buffer == "HTTP/1.0 404 Not Found\r\n") {
-						PANIC("HTTP/1.0 404 Not Found");
-					} else {
-						string buf = buffer;
-						//create file with data received
-						size_t file_start = buf.find("{", 0);
-						size_t file_end = buf.length() - 1;
-						int file_length = file_end - file_start - 1;
-						buf = buf.substr(file_start + 1, file_length);
-						file += buf;
-					}
+					file += buffer;
 				}
 			} while (bytes_read > 0);
+			cout << "fileee  :" << file << endl;
+			if (file == "HTTP/1.0 404 Not Found\r\n") {
+				PANIC("HTTP/1.0 404 Not Found");
+			} else {
+				//create file with data received
+				size_t file_start = file.find("{", 0);
+				size_t file_end = file.length() - 1;
+				int file_length = file_end - file_start - 1;
+				file = file.substr(file_start + 1, file_length);
+			}
 			/*-------------@TODO-------------*/
 			/*------check if file is image handle it--------*/
 			/*-----write it to file-----*/
-			outfile << file;
+			cout << "my file : " << file << endl;
+			size_t size = 60167;
+			outfile.write(file.c_str(),size);
 			outfile.close();
 			/*---Clean up---*/
 			close(sockfd);
@@ -149,3 +151,4 @@ int main(int Count, char *Strings[]) {
 	}
 	return 0;
 }
+
