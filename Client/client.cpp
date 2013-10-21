@@ -24,7 +24,8 @@ using namespace std;
 /*------------------------------------------------*/
 #define MAXBUF 1024 // max buffer size
 string fileName = "requests.txt"; // file containing requests
-string portnum = "80"; // default port number
+static string portNumber = "8005"; // default port number
+string server_ip = "127.0.0.1"; //default host name
 /*------------------------------------------------*/
 void PANIC(const char *msg) {
 	perror(msg);
@@ -50,23 +51,37 @@ string send_request(string port_num, string host_name, char* request) {
 	struct hostent *server;
 	string response;
 
+	// create a socket
+	// socket(int domain, int type, int protocol)
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		PANIC("Socket");
 
 	/*---Initialize server address/port struct---*/
-	server = gethostbyname(host_name.c_str());
-	// if server is null so there is no host with this name
-	if (server == NULL) {
-		fprintf(stderr, "ERROR, no such host\n");
-		exit(0);
-	}
-	bzero((char *) &dest, sizeof(dest));
-	// set address domain of the socket
-	dest.sin_family = AF_INET;
-	bcopy((char *) server->h_addr,
-	(char *)&dest.sin_addr.s_addr,
-	server->h_length);
-	//set port number
+	if (host_name != "") {
+		server = gethostbyname(host_name.c_str());
+		// if server is null so there is no host with this name
+		if (server == NULL) {
+			fprintf(stderr, "ERROR, no such host\n");
+			exit(0);
+		}
+		// clear address structure
+		bzero((char *) &dest, sizeof(dest));
+		// set address domain of the socket
+		dest.sin_family = AF_INET;
+		// automatically be filled with current host's IP address
+		bcopy((char *) server->h_addr,
+		(char *)&dest.sin_addr.s_addr,
+		server->h_length);
+	} else
+	{
+		// clear address structure
+				bzero((char *) &dest, sizeof(dest));
+				// set address domain of the socket
+				dest.sin_family = AF_INET;
+				// automatically be filled with current host's IP address
+				dest.sin_addr.s_addr = inet_addr(server_ip.c_str());
+			}
+		// convert short integer value for port must be converted into network byte order
 	dest.sin_port = htons(atoi(port_num.c_str()));
 	/*---Connect to server---*/
 	if (connect(sockfd, (struct sockaddr*) &dest, sizeof(dest)) != 0)
@@ -74,6 +89,7 @@ string send_request(string port_num, string host_name, char* request) {
 	/*------Send Request to Server--------*/
 	sprintf(buffer, request);
 	send(sockfd, buffer, strlen(buffer), 0);
+
 	/*----------While there's data, read and append it to the response ---*/
 	do {
 		bzero(buffer, sizeof(buffer));
@@ -92,19 +108,31 @@ string send_request(string port_num, string host_name, char* request) {
 	return response;
 }
 
-int main(int Count, char *Strings[]) {
+int main(int argc, char *argv[]) {
+
 	/*-----------initialize variables---------------*/
 	string fileRead;
 	string response;
 	string file;
-	string portNum = "";
+	string portNum;
 	string line;
+	string host_name;
 	int TempNumOne = fileName.size();
 	char Filename[100];
 	for (int a = 0; a <= TempNumOne; a++) {
 		Filename[a] = fileName[a];
 	}
 	ifstream myfile(Filename);
+
+	/*------------------------------------------*/
+	if (argc < 3) {
+		fprintf(stderr, "usage %s hostname port\n", argv[0]);
+		exit(0);
+	}
+	/*--------set port and server ip------------*/
+	server_ip = argv[1];
+	portNumber = argv[2];
+
 	/*-----------------------------------------------------------*/
 	/*---------Read Requests File-----------------*/
 	//open file
@@ -124,8 +152,17 @@ int main(int Count, char *Strings[]) {
 			vector<string> vec = split(request);
 
 			//if port number sent remove it from request
+			/*--------set request attributes--------------*/
 			if (vec.size() == 4) {
 				request = request.substr(0, request.length() - vec[3].length());
+				portNum = vec[3];
+				host_name = vec[2];
+			} else if (vec.size() == 3) {
+				portNum = portNumber;
+				host_name = vec[2];
+			} else {
+				portNum = portNumber;
+				host_name = "";
 			}
 			/*----------get file requested---------------------*/
 			string fileName = vec[1].substr(1, vec[1].length());
@@ -133,14 +170,8 @@ int main(int Count, char *Strings[]) {
 			char* r = (char *) alloca(request.size() + 1);
 			memcpy(r, request.c_str(), request.size() + 1);
 
-			/*--------set request attributes--------------*/
-			if (vec.size() == 4) {
-				portNum = htons(atoi(vec[3].c_str()));
-			} else {
-				portNum = portnum;
-			}
 			/*---------------get server response------------------------*/
-			response = send_request(portNum, vec[2], r);
+			response = send_request(portNum, host_name, r);
 			cout << "Request : " << r << endl;
 			cout << "Response : " << response << endl;
 

@@ -61,9 +61,8 @@ string readTheFile(string fileName) {
 			while (myfile.good()) {
 				//line
 				getline(myfile, line);
-
 				fileRead += (line);
-
+				fileRead+="\n";
 			}
 			fileRead += "}";
 			myfile.close();
@@ -92,6 +91,7 @@ string readTheFile(string fileName) {
 			strstream << size;
 			strstream >> number;
 			fileRead += number;
+			fileRead+="\n";
 			fileRead += "{";
 			fileRead += oss.str();
 
@@ -139,14 +139,11 @@ int main(int argc, char *argv[]) {
 			printf("Here is the message: %s\n", buffer);
 			string buf = buffer;
 			vector<string> dataOfTheMessage = split(buf); //[GET , fname , HTTP1.0 ..]
-			if (dataOfTheMessage.size() == 3 && dataOfTheMessage[0] == "GET"
-					&& dataOfTheMessage[2] == "HTTP/1.0") {
+			if (dataOfTheMessage[0] == "GET") {
 				string fname = dataOfTheMessage[1];
 				fname = fname.substr(1, fname.size() - 1);
 				string dataReturned = readTheFile(fname);
 //				cout << dataReturned <<endl;
-				ofstream myFile("data.bin", ios::out | ios::binary);
-				myFile.write(dataReturned.c_str(), dataReturned.length());
 				n = write(newsockfd, dataReturned.c_str(),
 						dataReturned.length());
 			} else {
