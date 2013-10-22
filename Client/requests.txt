@@ -1,4 +1,4 @@
-GET /index.html localhost 8000\r\n
+GET /home.html localhost 8000\r\n
 GET /Gemfile.txt localhost\r\n
 GET /Amira.jpg\r\n
 \r\n
