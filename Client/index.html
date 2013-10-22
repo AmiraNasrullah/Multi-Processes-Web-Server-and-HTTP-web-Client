@@ -1,0 +1,82 @@
+<div id="homeSlider" class="wrapper960">
+
+  <big>home slider goes here</big>
+  <!-- <ul class="slider">
+    <li><img src="http://basic-slider.com/img/banner03.jpg" title="Automatically generated caption"></li>
+    <li><img src="http://basic-slider.com/img/banner02.jpg" title="Automatically generated caption"></li>
+   <li><img src="http://basic-slider.com/img/banner03.jpg" title="Automatically generated caption"></li>
+  </ul> -->
+  
+  <a href="javascript:void(0);" class="signUp L-signupLink"> <span> <%= raw t('views.landing.sign_up_free3') %> </span></a>
+
+</div> <!-- /end homeSlider -->
+
+<span class="horizontalSep"></span>
+
+<div id="whatIsSection" class="wrapper960 clearfix">
+  <h2 class="title"><%= raw t('views.landing.what_is')%></h2>
+  <p>
+    <%= raw t('views.landing.what_is_body')%>
+   <br /><br />
+  </p>
+
+  <figure class="L-videoLink">
+    <img src="/assets/newlayout/loggedout-images/video_thumbnail.jpg" />
+    <span class="icon L-openVideo"></span>
+    <figcaption><%= t('views.landing.video_msg') %></figcaption>
+  </figure>
+
+  
+</div> <!-- /end whatIsSweetyheaven -->
+
+<span class="horizontalSep"></span>
+
+<%= render partial: t('views.landing.testimonial_partial') %>
+
+<span class="horizontalSep"></span>
+
+<div id="otherServices" class="wrapper960 clearfix">
+  <h2 class="title"><%= raw t('views.landing.other_services')%></h2>
+
+  <div class="greyWrapper clearfix">
+    <div class="store">
+      <a href="<%= products_url %>">
+        <div class="iconBackground"><span class="icon"></span></div>
+      </a>
+      <h3><%= t('views.landing.store')%></h3>
+      <p>
+        <%= raw t('views.landing.store_body', store_link: link_to(t('views.landing.the_store'),products_url), signup_link: "<a href='javascript:void(0);' class='L-signupLink'>"+ t('views.landing.sweety') +"</a>" )%>
+       
+      </p>
+    </div>
+
+    <div class="schoolRewardsSystem">
+      <a href="<%= schools_url %>">
+        <div class="iconBackground"><span class="icon"></span></div>
+      </a>
+      <h3><%= t('views.landing.school_rewarding')%></h3>
+      <p>
+         <%= raw(t('views.landing.school_rewarding_body')) %>
+         <%= link_to(t('views.landing.more_details'), schools_url)%>
+
+      </p>
+    </div>
+  </div>
+</div> <!-- /end otherServices -->
+
+<div id="videoWrapper">
+  <a href="javascript:void(0);" class="closeBox L-close L-closeVideo">x</a>
+  <iframe width="650" height="352" src="http://www.youtube.com/embed/J1xpSngW7E8?autohide=1" autohide="2" frameborder="0" allowfullscreen=""></iframe>
+</div>
+
+ <div id="toTop" title="Go To Top"></div> <!-- back to top arrow -->
+ 
+<%= content_for(:javascripts) do  %>
+  <%= javascript_include_tag "sweetyheaven/HomePage"%>
+  <script>
+    $(document).ready(function() {
+      homePage = HomePage();
+    });
+  </script>
+<% end %>
+

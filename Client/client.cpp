@@ -42,6 +42,14 @@ vector<string> split(string str) {
 	return tokens;
 }
 
+/*
+*send request : open a socket , connect to the server then send the request 
+*receive response until read bytes = -1. 
+*@attr port_num : port number to connect with it.
+*@attr host_name : host name of the socket.
+*@attr request : request to be sent to the server.
+*@return : string containing the response of the server.
+*/
 string send_request(string port_num, string host_name, char* request) {
 	// create socket
 	/*----attributes----*/
