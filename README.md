@@ -1,4 +1,4 @@
-Multi-threaded-Web-Server-and-Web-Client
+Multi-Processes-Web-Server-and-Web-Client
 =========================
 
 HTTP web (Server and Client) in C++
